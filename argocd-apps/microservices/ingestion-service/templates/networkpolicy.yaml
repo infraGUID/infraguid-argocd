@@ -60,7 +60,7 @@ spec:
           protocol: TCP
     {{- end }}
     {{- if .Values.networkPolicy.egressHTTPS }}
-    # Outbound HTTPS to AWS APIs (Secrets Manager, Bedrock, Cognito, S3, ECR).
+    # Outbound HTTPS to AWS APIs (Secrets Manager, Bedrock, Cognito, S3, SQS, ECR).
     - to:
         - ipBlock:
             cidr: 0.0.0.0/0

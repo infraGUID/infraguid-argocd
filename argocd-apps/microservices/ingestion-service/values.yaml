@@ -20,6 +20,10 @@ env:
   AWS_REGION: us-east-1
   AWS_SECRET_NAME: infraguidai/prod/app-secrets
   KNOWLEDGE_BASE_PATH: /app/knowledge-base
+  # Async ingestion: SQS_INGESTION_QUEUE_URL is injected from the app secret
+  # (terraform output: sqs_ingestion_queue_url). When present, /ingest enqueues
+  # a job and this pod's background worker drains the queue.
+  INGESTION_WORKER_ENABLED: "true"
 
 resources:
   requests:
