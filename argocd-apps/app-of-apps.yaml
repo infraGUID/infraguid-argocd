@@ -21,7 +21,7 @@ spec:
       # Scoped to the app layer + fluent-bit for initial GitOps onboarding.
       # The load-bearing cluster infra (LBC, ingress, metrics-server, redis)
       # stays helm-managed for now; add infra/*.yaml here to onboard it later.
-      include: "{apps/*.yaml,infra/fluent-bit.yaml}"
+      include: "{apps/*.yaml,infra/fluent-bit.yaml,infra/kubernetes-event-exporter.yaml}"
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd
