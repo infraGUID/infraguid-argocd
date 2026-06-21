@@ -18,8 +18,19 @@ env:
 
 resources:
   requests:
-    cpu: 100m
-    memory: 256Mi
-  limits:
-    cpu: 500m
+    cpu: 250m
     memory: 512Mi
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+
+# Default-deny network policy. Only the flows below are allowed.
+networkPolicy:
+  enabled: true
+  # Internal only — queried by agent-service.
+  allowExternal: false
+  ingressFrom:
+    - agent-service
+  egressTo: []
+  egressDNS: true   # CoreDNS
+  egressHTTPS: true  # AWS Bedrock embeddings + Secrets Manager

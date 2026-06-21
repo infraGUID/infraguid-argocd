@@ -30,3 +30,20 @@ resources:
   limits:
     cpu: 500m
     memory: 512Mi
+
+# Default-deny network policy. Only the flows below are allowed.
+networkPolicy:
+  enabled: true
+  # Public API (/api) reaches chat-service through the AWS ALB.
+  allowExternal: true
+  ingressFrom: []
+  # Fan-out to the internal services + redis.
+  egressTo:
+    - app: agent-service
+      port: 8001
+    - app: ingestion-service
+      port: 8003
+    - app: redis
+      port: 6379
+  egressDNS: true   # CoreDNS
+  egressHTTPS: true  # AWS Cognito + Secrets Manager

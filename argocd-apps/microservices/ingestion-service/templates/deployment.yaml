@@ -41,18 +41,29 @@ spec:
           volumeMounts:
             - name: knowledge-base
               mountPath: /app/knowledge-base
+          # Startup probe gives slow-booting services (AWS Secrets Manager /
+          # Bedrock init) up to ~150s before liveness/readiness take over.
+          startupProbe:
+            httpGet:
+              path: {{ .Values.healthPath }}
+              port: {{ .Values.port }}
+            periodSeconds: 5
+            failureThreshold: 30
+            timeoutSeconds: 3
           readinessProbe:
             httpGet:
               path: {{ .Values.healthPath }}
               port: {{ .Values.port }}
-            initialDelaySeconds: 15
             periodSeconds: 10
-            failureThreshold: 6
+            failureThreshold: 3
+            timeoutSeconds: 3
           livenessProbe:
-            tcpSocket:
+            httpGet:
+              path: {{ .Values.healthPath }}
               port: {{ .Values.port }}
-            initialDelaySeconds: 30
             periodSeconds: 20
+            failureThreshold: 3
+            timeoutSeconds: 3
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:

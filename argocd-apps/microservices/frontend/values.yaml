@@ -1,6 +1,7 @@
 name: frontend
 namespace: infraguid
 replicas: 2
+port: 80
 
 image:
   repository: 901607650789.dkr.ecr.us-east-1.amazonaws.com/infragui/frontend
@@ -20,3 +21,14 @@ resources:
   limits:
     cpu: 200m
     memory: 128Mi
+
+# Default-deny network policy. Only the flows below are allowed.
+networkPolicy:
+  enabled: true
+  # Static site served to the public via the AWS ALB. The browser calls /api
+  # directly through the ALB, so the frontend pod itself needs no app egress.
+  allowExternal: true
+  ingressFrom: []
+  egressTo: []
+  egressDNS: true
+  egressHTTPS: false

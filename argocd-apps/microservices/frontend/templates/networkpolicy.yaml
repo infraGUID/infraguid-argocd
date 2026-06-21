@@ -1,0 +1,71 @@
+{{- if .Values.networkPolicy.enabled }}
+# Default-deny for this app's pods (both Ingress and Egress are listed under
+# policyTypes), with only the flows below explicitly allowed.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ .Values.name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.name }}
+    app.kubernetes.io/part-of: infraguid
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ .Values.name }}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    {{- if .Values.networkPolicy.allowExternal }}
+    # Public traffic arrives via the AWS ALB in IP-target mode. The source is the
+    # load balancer ENI (not a pod), so it cannot be matched by a selector —
+    # allow any source on the service port.
+    - ports:
+        - port: {{ .Values.port }}
+          protocol: TCP
+    {{- end }}
+    {{- with .Values.networkPolicy.ingressFrom }}
+    - from:
+        {{- range . }}
+        - podSelector:
+            matchLabels:
+              app: {{ . }}
+        {{- end }}
+      ports:
+        - port: {{ $.Values.port }}
+          protocol: TCP
+    {{- end }}
+  egress:
+    {{- if .Values.networkPolicy.egressDNS }}
+    # DNS resolution via CoreDNS (kube-dns) in any namespace.
+    - to:
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - port: 53
+          protocol: UDP
+        - port: 53
+          protocol: TCP
+    {{- end }}
+    {{- range .Values.networkPolicy.egressTo }}
+    - to:
+        - podSelector:
+            matchLabels:
+              app: {{ .app }}
+      ports:
+        - port: {{ .port }}
+          protocol: TCP
+    {{- end }}
+    {{- if .Values.networkPolicy.egressHTTPS }}
+    # Outbound HTTPS to AWS APIs (Secrets Manager, Bedrock, Cognito, S3, ECR).
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+      ports:
+        - port: 443
+          protocol: TCP
+    {{- end }}
+{{- end }}

@@ -19,8 +19,23 @@ env:
 
 resources:
   requests:
-    cpu: 100m
-    memory: 256Mi
-  limits:
-    cpu: 500m
+    cpu: 200m
     memory: 512Mi
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+
+# Default-deny network policy. Only the flows below are allowed.
+networkPolicy:
+  enabled: true
+  # ALB-facing? agent-service is internal only.
+  allowExternal: false
+  # Allowed inbound peers (same-namespace app labels) on .Values.port (8001).
+  ingressFrom:
+    - chat-service
+  # Allowed outbound peers (same-namespace app labels) on the given ports.
+  egressTo:
+    - app: rag-service
+      port: 8002
+  egressDNS: true   # CoreDNS
+  egressHTTPS: true  # AWS Bedrock + Secrets Manager

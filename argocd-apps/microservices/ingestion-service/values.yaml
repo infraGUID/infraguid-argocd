@@ -23,8 +23,19 @@ env:
 
 resources:
   requests:
-    cpu: 100m
-    memory: 256Mi
-  limits:
-    cpu: 500m
+    cpu: 200m
     memory: 512Mi
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+
+# Default-deny network policy. Only the flows below are allowed.
+networkPolicy:
+  enabled: true
+  # Internal only — invoked by chat-service.
+  allowExternal: false
+  ingressFrom:
+    - chat-service
+  egressTo: []
+  egressDNS: true   # CoreDNS
+  egressHTTPS: true  # AWS S3 (knowledge base sync) + Secrets Manager
