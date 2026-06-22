@@ -10,6 +10,7 @@ spec:
     - https://aws.github.io/eks-charts
     - https://kubernetes-sigs.github.io/metrics-server/
     - https://aws.github.io/aws-for-fluent-bit
+    - https://charts.bitnami.com/bitnami
   destinations:
     - server: https://kubernetes.default.svc
       namespace: "*"
