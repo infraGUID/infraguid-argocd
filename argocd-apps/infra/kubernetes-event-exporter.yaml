@@ -1,27 +1,5 @@
-# Kubernetes Event Exporter — ships k8s Warning Events to CloudWatch via stdout.
-#
-# WHY THIS EXISTS
-# ───────────────
-# Most k8s failure *reasons* (OOMKilled, FailedScheduling, Evicted, ImagePullBackOff,
-# FailedMount, NodeNotReady, FailedCreatePodSandBox, …) are Kubernetes Event objects
-# (kubectl get events), NOT container stdout. Fluent Bit's DaemonSet only reads
-# /var/log/containers/, so those events never reach /infraguid/prod/pod-logs and the
-# log-intel Lambda subscription filter never fires on them.
-#
-# HOW IT WORKS
-# ────────────
-# This exporter (Deployment, not DaemonSet) watches the k8s Events API and writes
-# Warning events to its own stdout as JSON lines shaped like a Fluent Bit record:
-#
-#   {"log":"OOMKilled: Container was killed","kubernetes":{"pod_name":"api-xyz","namespace_name":"infraguid",...}}
-#
-# Fluent Bit DaemonSet already collects all pod stdout → ships to /infraguid/prod/pod-logs.
-# The log-intel subscription filter matches the `reason` keyword in `log`, the Lambda
-# fires, and collect.py parses the `kubernetes.*` fields for pod/namespace metadata —
-# exactly as it does for regular pod logs. No new AWS infra needed.
-#
-# RBAC: the Bitnami chart creates a ClusterRole (get/list/watch events) and binds it to
-# the ServiceAccount automatically.
+# Kubernetes Event Exporter — plain manifests (resmoio image) under
+# infrastructure/event-exporter. Replaces the withdrawn Bitnami Helm chart.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -30,54 +8,9 @@ metadata:
 spec:
   project: infraguid
   source:
-    repoURL: https://charts.bitnami.com/bitnami
-    chart: kubernetes-event-exporter
-    targetRevision: "3.1.0"
-    helm:
-      values: |
-        replicaCount: 1
-
-        config:
-          logLevel: error
-          logFormat: json
-
-          receivers:
-            - name: stdout
-              file:
-                path: /dev/stdout
-                # Shape the output as a Fluent Bit-style record so collect.py
-                # can parse pod name and namespace without any code changes.
-                # `log` contains the reason + message that the CloudWatch filter
-                # and ANOMALY_PATTERNS substring-match against.
-                layout:
-                  log: "{{ .Reason }}: {{ .Message }}"
-                  kubernetes:
-                    pod_name: "{{ .InvolvedObject.Name }}"
-                    namespace_name: "{{ .InvolvedObject.Namespace }}"
-                    container_name: "{{ .InvolvedObject.FieldPath }}"
-                    reason: "{{ .Reason }}"
-                    kind: "{{ .InvolvedObject.Kind }}"
-
-          route:
-            routes:
-              # Only Warning events — Normal events are too noisy and cheap.
-              - match:
-                  - receiver: stdout
-                    labels:
-                      type: Warning
-
-        # Run in the same namespace as Fluent Bit so naming is consistent.
-        # Fluent Bit's DaemonSet collects stdout from pods in all namespaces.
-        namespace: amazon-cloudwatch
-
-        resources:
-          requests:
-            cpu: 10m
-            memory: 32Mi
-          limits:
-            cpu: 50m
-            memory: 64Mi
-
+    repoURL: https://github.com/infraGUID/infraguid-argocd.git
+    targetRevision: main
+    path: argocd-apps/infrastructure/event-exporter
   destination:
     server: https://kubernetes.default.svc
     namespace: amazon-cloudwatch
