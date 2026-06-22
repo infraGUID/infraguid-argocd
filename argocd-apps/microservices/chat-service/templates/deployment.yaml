@@ -7,7 +7,9 @@ metadata:
     app: {{ .Values.name }}
     app.kubernetes.io/part-of: infraguid
 spec:
+  {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicas }}
+  {{- end }}
   selector:
     matchLabels:
       app: {{ .Values.name }}

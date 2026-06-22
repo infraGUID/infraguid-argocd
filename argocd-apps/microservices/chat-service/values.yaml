@@ -31,6 +31,14 @@ resources:
     cpu: 500m
     memory: 512Mi
 
+# HorizontalPodAutoscaler. When enabled, the HPA owns the replica count, so the
+# Deployment's static `replicas` field is omitted (see templates/deployment.yaml).
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 6
+  targetCPUUtilizationPercentage: 70
+
 # Default-deny network policy. Only the flows below are allowed.
 networkPolicy:
   enabled: true
