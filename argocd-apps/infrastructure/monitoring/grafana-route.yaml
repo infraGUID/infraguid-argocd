@@ -1,0 +1,20 @@
+# Expose Grafana at grafana.nutritrack360.in through the shared Envoy Gateway NLB.
+# Mirrors the argocd-route pattern: HTTPRoute in the app's namespace attaches to
+# the infraguid Gateway's :443 listener (allowedRoutes.namespaces.from: All).
+# TLS is terminated on the NLB (wildcard ACM cert); traffic arrives as plain HTTP.
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: grafana
+  namespace: monitoring
+spec:
+  parentRefs:
+    - name: infraguid
+      namespace: infraguid
+      sectionName: https
+  hostnames:
+    - "grafana.nutritrack360.in"
+  rules:
+    - backendRefs:
+        - name: prom-grafana
+          port: 80
