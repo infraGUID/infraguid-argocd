@@ -25,7 +25,7 @@ metadata:
     alb.ingress.kubernetes.io/group.name: infraguid
     alb.ingress.kubernetes.io/group.order: "10"
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
-    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:901607650789:certificate/5e3e20f5-5666-414c-b5dc-0345e405082b
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:901607650789:certificate/5e3e20f5-5666-414c-b5dc-0345e405082b,arn:aws:acm:us-east-1:901607650789:certificate/eee36b2d-2791-434f-9c30-611c78625284
     alb.ingress.kubernetes.io/ssl-redirect: "443"
     alb.ingress.kubernetes.io/healthcheck-protocol: HTTP
     alb.ingress.kubernetes.io/healthcheck-path: /api/health
@@ -56,7 +56,7 @@ metadata:
     alb.ingress.kubernetes.io/group.name: infraguid
     alb.ingress.kubernetes.io/group.order: "100"
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
-    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:901607650789:certificate/5e3e20f5-5666-414c-b5dc-0345e405082b
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:901607650789:certificate/5e3e20f5-5666-414c-b5dc-0345e405082b,arn:aws:acm:us-east-1:901607650789:certificate/eee36b2d-2791-434f-9c30-611c78625284
     alb.ingress.kubernetes.io/ssl-redirect: "443"
     alb.ingress.kubernetes.io/healthcheck-protocol: HTTP
     alb.ingress.kubernetes.io/healthcheck-path: /
