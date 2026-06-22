@@ -61,9 +61,11 @@ spec:
     - name: https
       protocol: HTTP
       port: 443
+      # Allow HTTPRoutes from any namespace to attach (per-subdomain apps like
+      # argocd live in their own namespaces, e.g. argocd.nutritrack360.in).
       allowedRoutes:
         namespaces:
-          from: Same
+          from: All
 ---
 # Application routing on the (TLS-offloaded) :443 listener.
 apiVersion: gateway.networking.k8s.io/v1

@@ -1,0 +1,22 @@
+# Expose the ArgoCD UI/API at argocd.nutritrack360.in through the shared
+# Envoy Gateway NLB. The route lives in the argocd namespace (same as the
+# argocd-server Service, so no ReferenceGrant is needed) and attaches to the
+# infraguid Gateway's :443 listener (which allows routes from all namespaces).
+# TLS is terminated on the NLB (wildcard cert); argocd-server runs with
+# server.insecure=true so it serves plain HTTP behind the LB.
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: argocd
+  namespace: argocd
+spec:
+  parentRefs:
+    - name: infraguid
+      namespace: infraguid
+      sectionName: https
+  hostnames:
+    - "argocd.nutritrack360.in"
+  rules:
+    - backendRefs:
+        - name: argocd-server
+          port: 80
