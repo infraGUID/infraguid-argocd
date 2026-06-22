@@ -8,7 +8,7 @@ healthPath: /api/health
 image:
   # <ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/infragui/chat-service
   repository: 901607650789.dkr.ecr.us-east-1.amazonaws.com/infragui/chat-service
-  tag: main-c12580e84d3f1ec6d0c28a4abfc238b1b4c5efa3
+  tag: v1
   pullPolicy: IfNotPresent
 
 # Non-secret config. POSTGRES_URI / Cognito / Bedrock model ids are pulled at
@@ -18,7 +18,7 @@ env:
   LOG_LEVEL: INFO
   AWS_REGION: us-east-1
   AWS_SECRET_NAME: infraguidai/prod/app-secrets
-  FRONTEND_ORIGIN: https://yourdomain.com
+  FRONTEND_ORIGIN: https://nutritrack360.in
   REDIS_URL: redis://redis:6379/0
   AGENT_SERVICE_URL: http://agent-service:8001
   INGESTION_SERVICE_URL: http://ingestion-service:8003
@@ -47,3 +47,4 @@ networkPolicy:
       port: 6379
   egressDNS: true   # CoreDNS
   egressHTTPS: true  # AWS Cognito + Secrets Manager
+  egressPostgres: true  # RDS 5432 within VPC

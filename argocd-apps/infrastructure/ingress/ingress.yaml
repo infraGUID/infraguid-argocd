@@ -1,124 +1,74 @@
-# Kubernetes Gateway API resources, served by the AWS Load Balancer Controller
-# (v2.14+, feature gate ALBGatewayAPI). Provisions an internet-facing ALB with
-# HTTPS terminated using the ACM certificate.
-#
-# REPLACE_ACM_ARN is substituted with the terraform output `acm_certificate_arn`
-# by deploy.sh before this manifest is applied.
+# Classic AWS ALB Ingress, provisioned by the AWS Load Balancer Controller.
+# A single shared ALB (group.name=infraguid) is split into two Ingresses so each
+# backend gets its own target group with its own health check:
+#   /api  -> chat-service:8000   (health check /api/health)
+#   /     -> frontend:80         (health check /)
+# HTTPS is terminated on the ALB with the ACM certificate; HTTP redirects to HTTPS.
 ---
-# Cluster-scoped GatewayClass handled by the AWS Load Balancer Controller.
-apiVersion: gateway.networking.k8s.io/v1
-kind: GatewayClass
+apiVersion: networking.k8s.io/v1
+kind: IngressClass
 metadata:
   name: alb
 spec:
-  controllerName: gateway.k8s.aws/alb
+  controller: ingress.k8s.aws/alb
 ---
-# ALB-specific configuration (scheme + TLS cert). The Gateway references this
-# via spec.infrastructure.parametersRef. TLS certs cannot be set via the
-# Gateway listener certificateRefs with the ALB controller — they live here.
-apiVersion: gateway.k8s.aws/v1beta1
-kind: LoadBalancerConfiguration
+# API: /api -> chat-service. Lower group.order = higher rule priority, so /api is
+# evaluated before the frontend catch-all.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
 metadata:
-  name: infraguid-lbconfig
+  name: api
   namespace: infraguid
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/group.name: infraguid
+    alb.ingress.kubernetes.io/group.order: "10"
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:901607650789:certificate/5e3e20f5-5666-414c-b5dc-0345e405082b
+    alb.ingress.kubernetes.io/ssl-redirect: "443"
+    alb.ingress.kubernetes.io/healthcheck-protocol: HTTP
+    alb.ingress.kubernetes.io/healthcheck-path: /api/health
+    alb.ingress.kubernetes.io/healthcheck-interval-seconds: "30"
+    alb.ingress.kubernetes.io/healthy-threshold-count: "3"
 spec:
-  scheme: internet-facing
-  ipAddressType: ipv4
-  listenerConfigurations:
-    - protocolPort: HTTPS:443
-      defaultCertificate: REPLACE_ACM_ARN
----
-# The Gateway provisions the internet-facing ALB with HTTP:80 + HTTPS:443.
-apiVersion: gateway.networking.k8s.io/v1
-kind: Gateway
-metadata:
-  name: infraguid
-  namespace: infraguid
-spec:
-  gatewayClassName: alb
-  infrastructure:
-    parametersRef:
-      group: gateway.k8s.aws
-      kind: LoadBalancerConfiguration
-      name: infraguid-lbconfig
-  listeners:
-    - name: http
-      protocol: HTTP
-      port: 80
-      allowedRoutes:
-        namespaces:
-          from: Same
-    - name: https
-      protocol: HTTPS
-      port: 443
-      allowedRoutes:
-        namespaces:
-          from: Same
----
-# Application routing: /api -> chat-service, everything else -> frontend.
-# Attached to both the http and https listeners so the site works on either.
-apiVersion: gateway.networking.k8s.io/v1
-kind: HTTPRoute
-metadata:
-  name: infraguid-routes
-  namespace: infraguid
-spec:
-  parentRefs:
-    - name: infraguid
-      sectionName: http
-    - name: infraguid
-      sectionName: https
-  hostnames:
-    - "nutritrack360.in"
-    - "www.nutritrack360.in"
+  ingressClassName: alb
   rules:
-    - matches:
-        - path:
-            type: PathPrefix
-            value: /api
-      backendRefs:
-        - name: chat-service
-          port: 8000
-    - matches:
-        - path:
-            type: PathPrefix
-            value: /
-      backendRefs:
-        - name: frontend
-          port: 80
+    - http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: chat-service
+                port:
+                  number: 8000
 ---
-# chat-service serves under /api, so its ALB target group must health-check
-# /api/health rather than the default "/" (which would 404 and mark it down).
-apiVersion: gateway.k8s.aws/v1beta1
-kind: TargetGroupConfiguration
+# Frontend: catch-all "/" -> frontend nginx.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
 metadata:
-  name: chat-service-tgconfig
+  name: frontend
   namespace: infraguid
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/group.name: infraguid
+    alb.ingress.kubernetes.io/group.order: "100"
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:901607650789:certificate/5e3e20f5-5666-414c-b5dc-0345e405082b
+    alb.ingress.kubernetes.io/ssl-redirect: "443"
+    alb.ingress.kubernetes.io/healthcheck-protocol: HTTP
+    alb.ingress.kubernetes.io/healthcheck-path: /
 spec:
-  targetReference:
-    kind: Service
-    name: chat-service
-  defaultConfiguration:
-    # Services are ClusterIP, so target pod IPs directly (not instance/NodePort).
-    targetType: ip
-    healthCheckConfig:
-      healthCheckPath: /api/health
-      healthCheckProtocol: HTTP
-      healthCheckInterval: 30
-      healthyThresholdCount: 3
----
-# Frontend (nginx) target group — IP targets, default "/" health check.
-apiVersion: gateway.k8s.aws/v1beta1
-kind: TargetGroupConfiguration
-metadata:
-  name: frontend-tgconfig
-  namespace: infraguid
-spec:
-  targetReference:
-    kind: Service
-    name: frontend
-  defaultConfiguration:
-    targetType: ip
-    healthCheckConfig:
-      healthCheckPath: /
-      healthCheckProtocol: HTTP
+  ingressClassName: alb
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend
+                port:
+                  number: 80

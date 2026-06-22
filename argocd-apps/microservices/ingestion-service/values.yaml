@@ -7,7 +7,7 @@ healthPath: /health
 
 image:
   repository: 901607650789.dkr.ecr.us-east-1.amazonaws.com/infragui/ingestion-service
-  tag: main-c12580e84d3f1ec6d0c28a4abfc238b1b4c5efa3
+  tag: v1
   pullPolicy: IfNotPresent
 
 # Knowledge base S3 bucket (terraform output: knowledge_base_bucket_name).
@@ -43,3 +43,4 @@ networkPolicy:
   egressTo: []
   egressDNS: true   # CoreDNS
   egressHTTPS: true  # AWS S3 (knowledge base sync) + Secrets Manager
+  egressPostgres: true  # RDS 5432 within VPC

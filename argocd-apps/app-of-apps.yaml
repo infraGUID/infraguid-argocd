@@ -18,10 +18,9 @@ spec:
     directory:
       # recurse so the include globs below can reach apps/ and infra/ subdirs.
       recurse: true
-      # Scoped to the app layer + fluent-bit for initial GitOps onboarding.
-      # The load-bearing cluster infra (LBC, ingress, metrics-server, redis)
-      # stays helm-managed for now; add infra/*.yaml here to onboard it later.
-      include: "{apps/*.yaml,infra/fluent-bit.yaml,infra/kubernetes-event-exporter.yaml}"
+      # Full GitOps: the app layer (apps/*.yaml) plus all cluster infra
+      # (LBC, ingress, metrics-server, redis, fluent-bit, event-exporter).
+      include: "{apps/*.yaml,infra/*.yaml}"
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd

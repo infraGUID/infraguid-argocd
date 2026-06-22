@@ -7,7 +7,7 @@ healthPath: /health
 
 image:
   repository: 901607650789.dkr.ecr.us-east-1.amazonaws.com/infragui/rag-service
-  tag: main-c12580e84d3f1ec6d0c28a4abfc238b1b4c5efa3
+  tag: v1
   pullPolicy: IfNotPresent
 
 env:
@@ -34,3 +34,4 @@ networkPolicy:
   egressTo: []
   egressDNS: true   # CoreDNS
   egressHTTPS: true  # AWS Bedrock embeddings + Secrets Manager
+  egressPostgres: true  # RDS 5432 within VPC

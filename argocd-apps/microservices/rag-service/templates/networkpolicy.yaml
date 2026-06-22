@@ -68,4 +68,13 @@ spec:
         - port: 443
           protocol: TCP
     {{- end }}
+    {{- if .Values.networkPolicy.egressPostgres }}
+    # PostgreSQL (RDS) reachable within the VPC CIDR.
+    - to:
+        - ipBlock:
+            cidr: 10.0.0.0/16
+      ports:
+        - port: 5432
+          protocol: TCP
+    {{- end }}
 {{- end }}
