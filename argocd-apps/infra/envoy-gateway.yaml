@@ -1,0 +1,30 @@
+# Envoy Gateway — in-cluster Kubernetes Gateway API implementation (L7).
+# Installed ahead of the Gateway resources (sync-wave 0) since it ships the
+# Gateway API CRDs and the controller that programs them. Exposed to the
+# internet via an NLB (see infrastructure/gateway/), with TLS terminated on the
+# NLB using ACM certs.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: envoy-gateway
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  project: infraguid
+  source:
+    repoURL: docker.io/envoyproxy
+    chart: gateway-helm
+    targetRevision: v1.4.0
+    helm:
+      releaseName: eg
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: envoy-gateway-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
