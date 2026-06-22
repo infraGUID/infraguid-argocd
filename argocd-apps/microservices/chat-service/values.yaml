@@ -8,7 +8,7 @@ healthPath: /api/health
 image:
   # <ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/infragui/chat-service
   repository: 901607650789.dkr.ecr.us-east-1.amazonaws.com/infragui/chat-service
-  tag: v1
+  tag: v1.0.0
   pullPolicy: IfNotPresent
 
 # Non-secret config. POSTGRES_URI / Cognito / Bedrock model ids are pulled at
