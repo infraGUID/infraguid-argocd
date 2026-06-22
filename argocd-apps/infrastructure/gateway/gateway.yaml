@@ -36,8 +36,9 @@ spec:
           service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
           service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
           # NLB terminates TLS on :443 with a single ACM wildcard cert
-          # (*.nutritrack360.in + nutritrack360.in apex).
-          service.beta.kubernetes.io/aws-load-balancer-ssl-cert: "arn:aws:acm:us-east-1:901607650789:certificate/9eae8803-1105-44c9-8718-955b9ac1472a"
+          # (*.nutritrack360.in + nutritrack360.in apex) managed by Terraform
+          # (module.dns). Covers every subdomain: www, argocd, grafana, …
+          service.beta.kubernetes.io/aws-load-balancer-ssl-cert: "arn:aws:acm:us-east-1:901607650789:certificate/a3de2408-04e0-42f8-8979-a84c247b5b0f"
           service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "443"
           service.beta.kubernetes.io/aws-load-balancer-ssl-negotiation-policy: ELBSecurityPolicy-TLS13-1-2-2021-06
 ---
