@@ -35,6 +35,31 @@ subjects:
     name: event-exporter
     namespace: amazon-cloudwatch
 ---
+# ArgoCD emits events on Application objects; resmoio enriches every event by
+# reading its involved object, so grant read on the argoproj CRDs too (the
+# built-in "view" role does not cover custom resources).
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: event-exporter-argo-read
+rules:
+  - apiGroups: ["argoproj.io"]
+    resources: ["applications", "applicationsets", "appprojects"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: event-exporter-argo-read
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: event-exporter-argo-read
+subjects:
+  - kind: ServiceAccount
+    name: event-exporter
+    namespace: amazon-cloudwatch
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
