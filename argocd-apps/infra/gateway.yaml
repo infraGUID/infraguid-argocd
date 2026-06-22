@@ -1,0 +1,22 @@
+# Gateway API resources (GatewayClass, EnvoyProxy, Gateway, HTTPRoutes) for the
+# Envoy Gateway data plane. Synced after the controller (sync-wave 1).
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: gateway
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  project: infraguid
+  source:
+    repoURL: https://github.com/infraGUID/infraguid-argocd.git
+    targetRevision: main
+    path: argocd-apps/infrastructure/gateway
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: infraguid
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
