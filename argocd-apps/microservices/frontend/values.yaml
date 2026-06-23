@@ -5,7 +5,7 @@ port: 80
 
 image:
   repository: 901607650789.dkr.ecr.us-east-1.amazonaws.com/infragui/frontend
-  tag: v1
+  tag: v1.0.2
   pullPolicy: IfNotPresent
 
 cognito:
