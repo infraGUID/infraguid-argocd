@@ -1,4 +1,4 @@
-apiVersion: v2
+﻿apiVersion: v2
 name: frontend
 description: InfraGuidAI static frontend (nginx) served behind the ALB ingress
 type: application

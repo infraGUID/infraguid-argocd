@@ -1,4 +1,4 @@
-apiVersion: v2
+﻿apiVersion: v2
 name: agent-service
 description: InfraGuidAI LangGraph ReAct DevOps agent (tool calling)
 type: application

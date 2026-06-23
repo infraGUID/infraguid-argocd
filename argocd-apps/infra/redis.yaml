@@ -1,5 +1,4 @@
-# Ephemeral Redis for chat session storage (TTL-based, no persistence needed).
-apiVersion: argoproj.io/v1alpha1
+﻿apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: redis

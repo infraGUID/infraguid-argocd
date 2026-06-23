@@ -1,4 +1,4 @@
-apiVersion: v2
+﻿apiVersion: v2
 name: rag-service
 description: InfraGuidAI RAG pipeline (embeddings + pgvector retrieval + generation)
 type: application

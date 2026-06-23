@@ -1,27 +1,10 @@
-# Kubernetes Event Exporter — ships k8s Warning Events to CloudWatch via stdout.
-#
-# Replaces the Bitnami Helm chart (whose public image was withdrawn in 2025)
-# with plain manifests on the maintained upstream image
-# resmoio/kubernetes-event-exporter — same config format, no external chart
-# dependency (mirrors infrastructure/redis/).
-#
-# WHY: most k8s failure reasons (OOMKilled, ImagePullBackOff, FailedScheduling,
-# Evicted, …) are Event objects, not container stdout. Fluent Bit only reads
-# /var/log/containers, so those events never reach /infraguid/prod/pod-logs.
-# This Deployment watches the Events API and writes Warning events to its own
-# stdout shaped like a Fluent Bit record; Fluent Bit then ships them, and the
-# log-intel subscription filter fires on the reason keyword.
----
+﻿---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: event-exporter
   namespace: amazon-cloudwatch
 ---
-# Bind to the built-in read-only "view" ClusterRole: it covers events (to watch)
-# plus read on core/apps/batch objects so resmoio can enrich each event with the
-# involved object's labels/annotations without spamming RBAC errors. "view"
-# excludes Secrets, so this stays least-privilege.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
@@ -35,9 +18,6 @@ subjects:
     name: event-exporter
     namespace: amazon-cloudwatch
 ---
-# ArgoCD emits events on Application objects; resmoio enriches every event by
-# reading its involved object, so grant read on the argoproj CRDs too (the
-# built-in "view" role does not cover custom resources).
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -73,9 +53,6 @@ data:
       - name: stdout
         file:
           path: /dev/stdout
-          # Shape the output as a Fluent Bit-style record so collect.py can parse
-          # pod name + namespace without code changes. `log` holds the reason +
-          # message the CloudWatch filter / ANOMALY_PATTERNS substring-match on.
           layout:
             log: "{{ .Reason }}: {{ .Message }}"
             kubernetes:
@@ -86,7 +63,6 @@ data:
               kind: "{{ .InvolvedObject.Kind }}"
     route:
       routes:
-        # Only Warning events — Normal events are too noisy.
         - match:
             - receiver: stdout
               type: Warning

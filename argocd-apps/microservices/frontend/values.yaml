@@ -1,4 +1,4 @@
-name: frontend
+﻿name: frontend
 namespace: infraguid
 replicas: 2
 port: 80
@@ -8,7 +8,6 @@ image:
   tag: v1
   pullPolicy: IfNotPresent
 
-# Cognito config injected into /js/config.js (terraform outputs).
 cognito:
   userPoolId: us-east-1_6j2IJV8GW
   appClientId: mrp68u2ab77qlirmp15aoaakd
@@ -22,11 +21,8 @@ resources:
     cpu: 200m
     memory: 128Mi
 
-# Default-deny network policy. Only the flows below are allowed.
 networkPolicy:
   enabled: true
-  # Static site served to the public via the AWS ALB. The browser calls /api
-  # directly through the ALB, so the frontend pod itself needs no app egress.
   allowExternal: true
   ingressFrom: []
   egressTo: []

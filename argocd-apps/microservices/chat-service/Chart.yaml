@@ -1,4 +1,4 @@
-apiVersion: v2
+﻿apiVersion: v2
 name: chat-service
 description: InfraGuidAI public entry point (chat, auth, documents, admin)
 type: application

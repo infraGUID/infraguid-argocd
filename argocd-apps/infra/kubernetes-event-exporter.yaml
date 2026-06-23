@@ -1,6 +1,4 @@
-# Kubernetes Event Exporter — plain manifests (resmoio image) under
-# infrastructure/event-exporter. Replaces the withdrawn Bitnami Helm chart.
-apiVersion: argoproj.io/v1alpha1
+﻿apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: kubernetes-event-exporter

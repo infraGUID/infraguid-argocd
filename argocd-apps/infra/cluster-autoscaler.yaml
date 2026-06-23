@@ -1,4 +1,4 @@
-apiVersion: argoproj.io/v1alpha1
+﻿apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: cluster-autoscaler
@@ -11,12 +11,9 @@ spec:
     targetRevision: 9.37.0
     helm:
       values: |
-        # Auto-discovers the EKS managed node group's ASG via the
-        # k8s.io/cluster-autoscaler/<cluster> tags EKS applies automatically.
         autoDiscovery:
           clusterName: infraguidai-prod
         awsRegion: us-east-1
-        # Pin the autoscaler image to the cluster's Kubernetes minor (1.30).
         image:
           tag: v1.30.2
         rbac:
@@ -24,7 +21,6 @@ spec:
             create: true
             name: cluster-autoscaler
             annotations:
-              # terraform output: irsa_cluster_autoscaler_role_arn
               eks.amazonaws.com/role-arn: arn:aws:iam::901607650789:role/infraguidai-prod-cluster-autoscaler-irsa
         extraArgs:
           balance-similar-node-groups: true

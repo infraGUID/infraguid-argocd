@@ -1,4 +1,4 @@
-name: chat-service
+﻿name: chat-service
 namespace: infraguid
 replicas: 2
 serviceAccountName: infraguid-app
@@ -6,13 +6,10 @@ port: 8000
 healthPath: /api/health
 
 image:
-  # <ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/infragui/chat-service
   repository: 901607650789.dkr.ecr.us-east-1.amazonaws.com/infragui/chat-service
   tag: v1
   pullPolicy: IfNotPresent
 
-# Non-secret config. POSTGRES_URI / Cognito / Bedrock model ids are pulled at
-# startup from Secrets Manager via AWS_SECRET_NAME + IRSA.
 env:
   APP_ENV: production
   LOG_LEVEL: INFO
@@ -31,21 +28,16 @@ resources:
     cpu: 500m
     memory: 512Mi
 
-# HorizontalPodAutoscaler. When enabled, the HPA owns the replica count, so the
-# Deployment's static `replicas` field is omitted (see templates/deployment.yaml).
 autoscaling:
   enabled: true
   minReplicas: 2
   maxReplicas: 6
   targetCPUUtilizationPercentage: 70
 
-# Default-deny network policy. Only the flows below are allowed.
 networkPolicy:
   enabled: true
-  # Public API (/api) reaches chat-service through the AWS ALB.
   allowExternal: true
   ingressFrom: []
-  # Fan-out to the internal services + redis.
   egressTo:
     - app: agent-service
       port: 8001

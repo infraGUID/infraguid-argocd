@@ -1,4 +1,4 @@
-apiVersion: apps/v1
+﻿apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Values.name }}
@@ -19,7 +19,6 @@ spec:
       serviceAccountName: {{ .Values.serviceAccountName }}
       {{- if .Values.knowledgeBaseBucket }}
       initContainers:
-        # Sync the knowledge base from S3 into a shared volume before startup.
         - name: kb-sync
           image: amazon/aws-cli:2.15.30
           command: ["aws", "s3", "sync", "s3://{{ .Values.knowledgeBaseBucket }}", "/app/knowledge-base"]
@@ -41,8 +40,6 @@ spec:
           volumeMounts:
             - name: knowledge-base
               mountPath: /app/knowledge-base
-          # Startup probe gives slow-booting services (AWS Secrets Manager /
-          # Bedrock init) up to ~150s before liveness/readiness take over.
           startupProbe:
             httpGet:
               path: {{ .Values.healthPath }}

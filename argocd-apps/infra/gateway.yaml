@@ -1,6 +1,4 @@
-# Gateway API resources (GatewayClass, EnvoyProxy, Gateway, HTTPRoutes) for the
-# Envoy Gateway data plane. Synced after the controller (sync-wave 1).
-apiVersion: argoproj.io/v1alpha1
+﻿apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: gateway

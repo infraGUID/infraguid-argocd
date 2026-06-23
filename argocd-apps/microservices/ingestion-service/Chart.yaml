@@ -1,4 +1,4 @@
-apiVersion: v2
+﻿apiVersion: v2
 name: ingestion-service
 description: InfraGuidAI document ingestion (load, chunk, embed, pgvector upsert)
 type: application

@@ -1,4 +1,4 @@
-name: rag-service
+﻿name: rag-service
 namespace: infraguid
 replicas: 2
 serviceAccountName: infraguid-app
@@ -24,10 +24,8 @@ resources:
     cpu: 1000m
     memory: 1Gi
 
-# Default-deny network policy. Only the flows below are allowed.
 networkPolicy:
   enabled: true
-  # Internal only — queried by agent-service.
   allowExternal: false
   ingressFrom:
     - agent-service

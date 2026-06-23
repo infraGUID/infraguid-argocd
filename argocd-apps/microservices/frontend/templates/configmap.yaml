@@ -1,6 +1,4 @@
-# Injects Cognito config into the static frontend at runtime. auth.js reads
-# these window globals (falling back to placeholders when unset).
-apiVersion: v1
+﻿apiVersion: v1
 kind: ConfigMap
 metadata:
   name: frontend-config

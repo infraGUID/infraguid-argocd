@@ -1,7 +1,4 @@
-# Root "app of apps". Apply this once after ArgoCD is installed:
-#   kubectl apply -n argocd -f argocd-apps/app-of-apps.yaml
-# It discovers and syncs every Application manifest under apps/ and infra/.
-apiVersion: argoproj.io/v1alpha1
+﻿apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: infraguid-root
@@ -11,15 +8,11 @@ metadata:
 spec:
   project: infraguid
   source:
-    # NOTE: replace with your repo URL (see argocd-apps/README.md).
     repoURL: https://github.com/infraGUID/infraguid-argocd.git
     targetRevision: main
     path: argocd-apps
     directory:
-      # recurse so the include globs below can reach apps/ and infra/ subdirs.
       recurse: true
-      # Full GitOps: the app layer (apps/*.yaml) plus all cluster infra
-      # (LBC, ingress, metrics-server, redis, fluent-bit, event-exporter).
       include: "{apps/*.yaml,infra/*.yaml}"
   destination:
     server: https://kubernetes.default.svc

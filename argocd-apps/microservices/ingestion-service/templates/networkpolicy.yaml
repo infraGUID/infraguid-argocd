@@ -1,6 +1,4 @@
-{{- if .Values.networkPolicy.enabled }}
-# Default-deny for this app's pods (both Ingress and Egress are listed under
-# policyTypes), with only the flows below explicitly allowed.
+﻿{{- if .Values.networkPolicy.enabled }}
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -18,9 +16,6 @@ spec:
     - Egress
   ingress:
     {{- if .Values.networkPolicy.allowExternal }}
-    # Public traffic arrives via the AWS ALB in IP-target mode. The source is the
-    # load balancer ENI (not a pod), so it cannot be matched by a selector —
-    # allow any source on the service port.
     - ports:
         - port: {{ .Values.port }}
           protocol: TCP
@@ -38,7 +33,6 @@ spec:
     {{- end }}
   egress:
     {{- if .Values.networkPolicy.egressDNS }}
-    # DNS resolution via CoreDNS (kube-dns) in any namespace.
     - to:
         - namespaceSelector: {}
           podSelector:
@@ -60,7 +54,6 @@ spec:
           protocol: TCP
     {{- end }}
     {{- if .Values.networkPolicy.egressHTTPS }}
-    # Outbound HTTPS to AWS APIs (Secrets Manager, Bedrock, Cognito, S3, SQS, ECR).
     - to:
         - ipBlock:
             cidr: 0.0.0.0/0
@@ -69,7 +62,6 @@ spec:
           protocol: TCP
     {{- end }}
     {{- if .Values.networkPolicy.egressPostgres }}
-    # PostgreSQL (RDS) reachable within the VPC CIDR.
     - to:
         - ipBlock:
             cidr: 10.0.0.0/16
